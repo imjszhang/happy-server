@@ -27,7 +27,7 @@ FROM node:20 AS runner
 WORKDIR /app
 
 # Install dependencies
-RUN apt-get update && apt-get install -y python3 ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y python3 ffmpeg curl && rm -rf /var/lib/apt/lists/*
 
 # Set environment to production
 ENV NODE_ENV=production
@@ -37,9 +37,10 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/sources ./sources
+COPY --from=builder /app/prisma ./prisma
 
 # Expose the port the app will run on
-EXPOSE 3000
+EXPOSE 3005
 
 # Command to run the application
 CMD ["yarn", "start"] 
