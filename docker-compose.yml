@@ -140,15 +140,15 @@ services:
       # Traefik 路由配置
       # 支持本地访问：happy.localhost（或通过 DOMAIN 环境变量自定义）
       # 支持局域网访问：{LAN_DOMAIN}（需要在 dokploy 中设置 LAN_DOMAIN 环境变量，例如：192.168.1.100）
-      # 如果未设置 LAN_DOMAIN，第二个 Host 规则会被忽略，不影响本地访问
+      # 如果未设置 LAN_DOMAIN，使用占位符 localhost.disabled 避免 Traefik 报错（不会匹配真实请求）
       - "traefik.enable=true"
-      - "traefik.http.routers.happy-api.rule=Host(`${DOMAIN:-happy.localhost}`) || Host(`${LAN_DOMAIN:-}`)"
+      - "traefik.http.routers.happy-api.rule=Host(`${DOMAIN:-happy.localhost}`) || Host(`${LAN_DOMAIN:-localhost.disabled}`)"
       - "traefik.http.routers.happy-api.entrypoints=web"
       - "traefik.http.services.happy-api.loadbalancer.server.port=3005"
       - "traefik.docker.network=dokploy-network"
       - "traefik.http.middlewares.happy-api-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.happy-api.middlewares=happy-api-headers"
-      - "traefik.http.routers.happy-api-secure.rule=Host(`${DOMAIN:-happy.localhost}`) || Host(`${LAN_DOMAIN:-}`)"
+      - "traefik.http.routers.happy-api-secure.rule=Host(`${DOMAIN:-happy.localhost}`) || Host(`${LAN_DOMAIN:-localhost.disabled}`)"
       - "traefik.http.routers.happy-api-secure.entrypoints=websecure"
       - "traefik.http.routers.happy-api-secure.tls=true"
     restart: unless-stopped
