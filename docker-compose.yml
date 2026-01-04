@@ -111,6 +111,9 @@ services:
       # 加密密钥（必需）
       HANDY_MASTER_SECRET: ${HANDY_MASTER_SECRET}
       
+      # API Key 配置（可选但推荐）
+      API_KEYS: ${API_KEYS:-}
+      
       # GitHub 集成（可选）
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}

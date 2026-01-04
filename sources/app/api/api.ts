@@ -17,6 +17,7 @@ import { artifactsRoutes } from "./routes/artifactsRoutes";
 import { accessKeysRoutes } from "./routes/accessKeysRoutes";
 import { enableMonitoring } from "./utils/enableMonitoring";
 import { enableErrorHandlers } from "./utils/enableErrorHandlers";
+import { enableApiKeyAuth } from "./utils/enableApiKeyAuth";
 import { enableAuthentication } from "./utils/enableAuthentication";
 import { userRoutes } from "./routes/userRoutes";
 import { feedRoutes } from "./routes/feedRoutes";
@@ -49,6 +50,7 @@ export async function startApi() {
     // Enable features
     enableMonitoring(typed);
     enableErrorHandlers(typed);
+    enableApiKeyAuth(typed);
     enableAuthentication(typed);
 
     // Routes
