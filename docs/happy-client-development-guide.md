@@ -43,6 +43,11 @@ Happy Server 采用**双层认证**架构：
 
 API Key 用于识别和授权客户端应用。
 
+**重要说明**:
+- 如果服务器配置了 `API_KEYS` 环境变量，**所有请求**（除白名单端点外）都必须包含 API Key
+- 如果服务器未配置 `API_KEYS`，则跳过 API Key 验证（向后兼容模式）
+- CLI 工具在连接时也需要提供 API Key（如果服务器已配置）
+
 **请求头格式**:
 ```
 X-API-Key: your_api_key_here
@@ -79,6 +84,7 @@ Happy Server 支持两种认证方式：
 ```
 POST /v1/auth
 Content-Type: application/json
+X-API-Key: your_api_key_here  # 如果服务器配置了 API_KEYS
 
 {
   "publicKey": "<base64_encoded_public_key>",
@@ -100,6 +106,8 @@ Content-Type: application/json
 - challenge 可以是任意数据（如时间戳）
 - signature 是对 challenge 的签名
 
+**注意**: 如果服务器配置了 `API_KEYS`，此请求必须包含 `X-API-Key` 请求头
+
 #### 方式二：设备授权流程（推荐）
 
 适用于 CLI 工具或需要手机扫码授权的场景：
@@ -108,6 +116,7 @@ Content-Type: application/json
 ```
 POST /v1/auth/request
 Content-Type: application/json
+X-API-Key: your_api_key_here  # 如果服务器配置了 API_KEYS
 
 {
   "publicKey": "<base64_encoded_public_key>",
@@ -125,6 +134,7 @@ Content-Type: application/json
 **步骤 2**: CLI 轮询授权状态
 ```
 GET /v1/auth/request/status?publicKey=<base64_encoded_public_key>
+X-API-Key: your_api_key_here  # 如果服务器配置了 API_KEYS
 ```
 
 **响应（等待中）**:
@@ -146,6 +156,18 @@ GET /v1/auth/request/status?publicKey=<base64_encoded_public_key>
 **步骤 3**: 获取 Token
 当状态变为 `authorized` 后，再次调用 `/v1/auth/request`：
 
+```
+POST /v1/auth/request
+Content-Type: application/json
+X-API-Key: your_api_key_here  # 如果服务器配置了 API_KEYS
+
+{
+  "publicKey": "<base64_encoded_public_key>",
+  "supportsV2": true
+}
+```
+
+**响应**:
 ```json
 {
   "state": "authorized",
@@ -153,6 +175,8 @@ GET /v1/auth/request/status?publicKey=<base64_encoded_public_key>
   "response": "<encrypted_response>"
 }
 ```
+
+**重要**: 如果服务器配置了 `API_KEYS` 环境变量，CLI 在认证流程的所有步骤中都必须提供 `X-API-Key` 请求头
 
 ---
 
@@ -458,6 +482,9 @@ Content-Type: application/json
 const socket = io("https://api.example.com", {
   path: "/v1/updates",
   transports: ["websocket", "polling"],
+  extraHeaders: {
+    "X-API-Key": "your_api_key_here"  // 如果服务器配置了 API_KEYS
+  },
   auth: {
     token: "user_token_here",
     clientType: "user-scoped",  // 或 "session-scoped" 或 "machine-scoped"
@@ -466,6 +493,10 @@ const socket = io("https://api.example.com", {
   }
 });
 ```
+
+**注意**: 
+- 如果服务器配置了 `API_KEYS` 环境变量，WebSocket 连接时也需要在 HTTP upgrade 请求中包含 `X-API-Key` 请求头
+- 使用 `extraHeaders` 选项（socket.io-client）或相应的配置项来添加 API Key
 
 ### 客户端类型
 
